@@ -66,7 +66,7 @@ const NavItemExpanded = ({
               isActive={isActive(item.url)}
               tooltip={item.title}
             >
-              <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
+              <Link href={item.url} target={item.newTab ? "_blank" : "_self"}>
                 {item.icon && <item.icon />}
                 <span>{item.title}</span>
                 {item.comingSoon && <IsComingSoon />}
@@ -80,7 +80,7 @@ const NavItemExpanded = ({
               {item.subItems.map((subItem) => (
                 <SidebarMenuSubItem key={subItem.title}>
                   <SidebarMenuSubButton aria-disabled={subItem.comingSoon} isActive={isActive(subItem.url)} asChild>
-                    <Link href={subItem.url} target={subItem.newTab ? "_blank" : undefined}>
+                    <Link href={subItem.url} target={subItem.newTab ? "_blank" : "_self"}>
                       {subItem.icon && <subItem.icon />}
                       <span>{subItem.title}</span>
                       {subItem.comingSoon && <IsComingSoon />}

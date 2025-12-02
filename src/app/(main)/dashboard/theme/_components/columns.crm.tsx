@@ -41,6 +41,13 @@ export const themeSchemaColumns: ColumnDef<z.infer<typeof themeSchema>>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "theme_id",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Theme ID" />,
+    cell: ({ row }) => <span className="font-mono">{row.original.theme_id}</span>,
+    enableSorting: true,
+    enableHiding: false,
+  },
+  {
     accessorKey: "title",
     header: ({ column }) => <DataTableColumnHeader column={column} title="제목" />,
     cell: ({ row }) => <Badge variant="outline">{row.original.title}</Badge>,

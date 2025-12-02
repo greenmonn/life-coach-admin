@@ -18,7 +18,8 @@ export async function fetchThemes(): Promise<z.infer<typeof themeSchema>[]> {
     const validatedData = apiResponseSchema.parse(data);
 
     return validatedData.themes.map((theme) => ({
-      id: theme.theme_id,
+      id: theme.id.toString(),
+      theme_id: theme.theme_id,
       title: theme.theme_title,
       category: theme.category,
       chunk_count: theme.num_chunks,

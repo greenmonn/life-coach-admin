@@ -25,12 +25,6 @@ export function TableCardsClient({ data }: TableCardsClientProps) {
     defaultPageSize: 10,
   });
 
-  // Create a stable key based on pagination to force DataTable re-render
-  // const paginationKey = useMemo(() => {
-  //   const pagination = table.getState().pagination;
-  //   return `${pagination.pageIndex}-${pagination.pageSize}`;
-  // }, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize]);
-
   return (
     <Card>
       <CardHeader>

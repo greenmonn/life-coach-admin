@@ -2,6 +2,7 @@ import z from "zod";
 
 export const themeSchema = z.object({
   id: z.string(),
+  theme_id: z.string(),
   title: z.string(),
   category: z.string(),
   chunk_count: z.number(),
@@ -10,6 +11,7 @@ export const themeSchema = z.object({
 });
 
 export const apiThemeSchema = z.object({
+  id: z.number(),
   theme_id: z.string(),
   theme_title: z.string(),
   category: z.string(),

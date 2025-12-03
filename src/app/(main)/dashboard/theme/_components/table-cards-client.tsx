@@ -1,10 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { Download } from "lucide-react";
 import z from "zod";
 
 import { DataTable } from "@/components/data-table/data-table";
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardAction } from "@/components/ui/card";
@@ -25,6 +26,12 @@ export function TableCardsClient({ data }: TableCardsClientProps) {
     defaultPageSize: 10,
   });
 
+  const paginationKey = useMemo(() => {
+      const pagination = table.getState().pagination;
+      const selectedRows = table.getFilteredSelectedRowModel().rows.length;
+      return `${pagination.pageIndex}-${pagination.pageSize}-${selectedRows}`;
+    }, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize, table.getFilteredSelectedRowModel().rows.length]);
+
   return (
     <Card>
       <CardHeader>
@@ -41,10 +48,7 @@ export function TableCardsClient({ data }: TableCardsClientProps) {
         </CardAction>
       </CardHeader>
       <CardContent className="flex size-full flex-col gap-4">
-        <div className="overflow-hidden rounded-md border">
-          <DataTable table={table} columns={themeSchemaColumns} />
-        </div>
-        <DataTablePagination table={table} />
+          <DataTable table={table} columns={themeSchemaColumns} key={paginationKey} />
       </CardContent>
     </Card>
   );

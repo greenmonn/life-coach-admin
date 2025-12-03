@@ -123,7 +123,6 @@ export function DataTable<TData, TValue>({
         id={sortableId}
       >
         {tableContent}
-        <DataTablePagination table={table} />
       </DndContext>
     );
   }

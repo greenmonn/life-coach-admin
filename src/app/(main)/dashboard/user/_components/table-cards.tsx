@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardAction } from "@/components/ui/card";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 
+import { exportToCSV } from "@/lib/export-utils";
+
 import { useConversationColumns } from "./columns.crm";
 import { useConversationData } from "./crm.config";
 
@@ -21,6 +23,18 @@ export function TableCards() {
     columns: conversationSchemaColumns,
     getRowId: (row) => row.id.toString(),
   });
+
+  const handleExport = () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    const rowsToExport = selectedRows.length > 0
+      ? selectedRows
+      : table.getFilteredRowModel().rows;
+
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `conversations_${timestamp}.csv`;
+    
+    exportToCSV(rowsToExport, conversationSchemaColumns, filename);
+  };
 
   const paginationKey = useMemo(() => {
     const pagination = table.getState().pagination;
@@ -37,7 +51,7 @@ export function TableCards() {
           <CardAction>
             <div className="flex items-center gap-2">
               {/* <DataTableViewOptions table={table} /> */}
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExport}>
                 <Download />
                 <span className="hidden lg:inline">Export</span>
               </Button>
@@ -45,10 +59,7 @@ export function TableCards() {
           </CardAction>
         </CardHeader>
         <CardContent className="flex size-full flex-col gap-4">
-          {/* <div className="overflow-hidden rounded-md border"> */}
-            <DataTable table={table} key={paginationKey} columns={conversationSchemaColumns} />
-          {/* </div> */}
-          {/* <DataTablePagination table={table} key={paginationKey}/> */}
+          <DataTable table={table} key={paginationKey} columns={conversationSchemaColumns} />
         </CardContent>
       </Card>
     </div>

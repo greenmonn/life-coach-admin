@@ -13,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 
 import { DataTable as DataTableNew } from "../../../../../components/data-table/data-table";
-import { DataTablePagination } from "../../../../../components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "../../../../../components/data-table/data-table-view-options";
 import { withDndColumn } from "../../../../../components/data-table/table-utils";
 
@@ -61,10 +60,7 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof sectionS
         </div>
       </div>
       <TabsContent value="participants_intervention" className="relative flex flex-col gap-4 overflow-auto">
-        <div className="overflow-hidden rounded-lg border">
-          <DataTableNew dndEnabled table={table} columns={columns} onReorder={setData} />
-        </div>
-        <DataTablePagination table={table} />
+        <DataTableNew dndEnabled table={table} columns={columns} onReorder={setData} />
       </TabsContent>
       <TabsContent value="participants_control" className="flex flex-col">
         <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>

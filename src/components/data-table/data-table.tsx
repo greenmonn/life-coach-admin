@@ -18,6 +18,7 @@ import { ColumnDef, flexRender, type Table as TanStackTable } from "@tanstack/re
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { DraggableRow } from "./draggable-row";
+import { DataTablePagination } from "./data-table-pagination";
 
 interface DataTableProps<TData, TValue> {
   table: TanStackTable<TData>;
@@ -87,24 +88,29 @@ export function DataTable<TData, TValue>({
   }
 
   const tableContent = (
-    <Table>
-      <TableHeader className="bg-muted sticky top-0 z-10">
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map((header) => {
-              return (
-                <TableHead key={header.id} colSpan={header.colSpan}>
-                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              );
-            })}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody className="**:data-[slot=table-cell]:first:w-8">
-        {renderTableBody({ table, columns, dndEnabled, dataIds })}
-      </TableBody>
-    </Table>
+    <>
+    <div className="overflow-hidden rounded-md border">
+      <Table>
+        <TableHeader className="bg-muted sticky top-0 z-10">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead key={header.id} colSpan={header.colSpan}>
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody className="**:data-[slot=table-cell]:first:w-8">
+          {renderTableBody({ table, columns, dndEnabled, dataIds })}
+        </TableBody>
+      </Table>
+    </div>
+    <DataTablePagination table={table} />
+    </>
   );
 
   if (dndEnabled) {
@@ -117,6 +123,7 @@ export function DataTable<TData, TValue>({
         id={sortableId}
       >
         {tableContent}
+        <DataTablePagination table={table} />
       </DndContext>
     );
   }

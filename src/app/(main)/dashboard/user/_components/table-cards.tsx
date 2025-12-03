@@ -3,21 +3,29 @@
 import { Download } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardAction } from "@/components/ui/card";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 
-import { conversationSchemaColumns } from "./columns.crm";
-import { conversationData } from "./crm.config";
+import { useConversationColumns } from "./columns.crm";
+import { useConversationData } from "./crm.config";
+
+import { useMemo } from "react";
 
 export function TableCards() {
+  const conversationSchemaColumns = useConversationColumns();
+  const conversationData = useConversationData();
   const table = useDataTableInstance({
     data: conversationData,
     columns: conversationSchemaColumns,
     getRowId: (row) => row.id.toString(),
   });
+
+  const paginationKey = useMemo(() => {
+    const pagination = table.getState().pagination;
+    return `${pagination.pageIndex}-${pagination.pageSize}`;
+  }, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize]);
 
   return (
     <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs">
@@ -36,10 +44,10 @@ export function TableCards() {
           </CardAction>
         </CardHeader>
         <CardContent className="flex size-full flex-col gap-4">
-          <div className="overflow-hidden rounded-md border">
-            <DataTable table={table} columns={conversationSchemaColumns} />
-          </div>
-          <DataTablePagination table={table} />
+          {/* <div className="overflow-hidden rounded-md border"> */}
+            <DataTable table={table} key={paginationKey} columns={conversationSchemaColumns} />
+          {/* </div> */}
+          {/* <DataTablePagination table={table} key={paginationKey}/> */}
         </CardContent>
       </Card>
     </div>

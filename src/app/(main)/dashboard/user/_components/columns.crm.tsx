@@ -81,16 +81,16 @@ export function useConversationColumns() {
         cell: ({ row }) => <span className="text-muted-foreground tabular-nums">{row.original.last_activity}</span>,
         enableSorting: false,
       },
-      {
-        id: "actions",
-        cell: () => (
-          <Button variant="ghost" className="text-muted-foreground flex size-8" size="icon">
-            <EllipsisVertical />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        ),
-        enableSorting: false,
-      },
+      // {
+      //   id: "actions",
+      //   cell: () => (
+      //     <Button variant="ghost" className="text-muted-foreground flex size-8" size="icon">
+      //       <EllipsisVertical />
+      //       <span className="sr-only">Open menu</span>
+      //     </Button>
+      //   ),
+      //   enableSorting: false,
+      // },
     ],
     [],
   );

@@ -19,10 +19,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { DataTableColumnHeader } from "../../../../../components/data-table/data-table-column-header";
 
-import { sectionSchema } from "./schema";
+import { participantSchema } from "./schema";
 import { TableCellViewer } from "./table-cell-viewer";
 
-export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
+export const dashboardColumns: ColumnDef<z.infer<typeof participantSchema>>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -129,4 +129,12 @@ export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
     ),
     enableSorting: false,
   },
+  {
+    accessorKey: "access_key",
+    header: ({ column }) => <DataTableColumnHeader className="w-full text-left" column={column} title="접속 키" />,
+    cell: ({ row }) => (
+      <p className="max-w-sm truncate">{row.original.access_key}</p>
+    ),
+    enableSorting: false,
+  }
 ];

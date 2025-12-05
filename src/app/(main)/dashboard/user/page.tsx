@@ -1,5 +1,3 @@
-import { InsightCards } from "./_components/insight-cards";
-import { OperationalCards } from "./_components/operational-cards";
 import { UserOverview } from "./_components/user-overview";
 import { TableCards } from "./_components/table-cards";
 

@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import { sectionSchema } from "./schema";
+import { participantSchema } from "./schema";
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -42,7 +42,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function TableCellViewer({ item }: { item: z.infer<typeof sectionSchema> }) {
+export function TableCellViewer({ item }: { item: z.infer<typeof participantSchema> }) {
   const isMobile = useIsMobile();
 
   return (
@@ -118,7 +118,7 @@ export function TableCellViewer({ item }: { item: z.infer<typeof sectionSchema> 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
                 <Label htmlFor="type">Recent Activity</Label>
-                <Select defaultValue={item.recent_activity}>
+                <Select defaultValue={item.recent_activity ?? undefined}>
                   <SelectTrigger id="type" className="w-full">
                     <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
@@ -155,7 +155,7 @@ export function TableCellViewer({ item }: { item: z.infer<typeof sectionSchema> 
               </div>
               <div className="flex flex-col gap-3">
                 <Label htmlFor="days_after_last_activity">Days after Last Activity</Label>
-                <Input id="days_after_last_activity" defaultValue={item.days_after_last_activity.toString()} />
+                <Input id="days_after_last_activity" defaultValue={item.days_after_last_activity?.toString() ?? ""} />
               </div>
             </div>
           </form>

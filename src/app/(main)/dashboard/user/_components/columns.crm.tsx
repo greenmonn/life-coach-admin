@@ -51,12 +51,19 @@ export function useConversationColumns() {
         enableHiding: false,
       },
       {
-        accessorKey: "participant_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} title="참여자 ID" />,
-        cell: ({ row }) => <span>{row.original.participant_id}</span>,
+        accessorKey: "session_index",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="세션 인덱스" />,
+        cell: ({ row }) => <span>{row.original.session_index}</span>,
         enableSorting: false,
         enableHiding: false,
       },
+      // {
+      //   accessorKey: "participant_id",
+      //   header: ({ column }) => <DataTableColumnHeader column={column} title="참여자 ID" />,
+      //   cell: ({ row }) => <span>{row.original.participant_id}</span>,
+      //   enableSorting: false,
+      //   enableHiding: false,
+      // },
       {
         accessorKey: "status",
         header: ({ column }) => <DataTableColumnHeader column={column} title="단계" />,
@@ -73,6 +80,18 @@ export function useConversationColumns() {
         accessorKey: "message_count",
         header: ({ column }) => <DataTableColumnHeader column={column} title="메시지 수" />,
         cell: ({ row }) => <span className="tabular-nums">{row.original.message_count}</span>,
+        enableSorting: false,
+      },
+      {
+        accessorKey: "start_time",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="시작 시간" />,
+        cell: ({ row }) => <span className="tabular-nums">{row.original.start_time}</span>,
+        enableSorting: false,
+      },
+      {
+        accessorKey: "end_time",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="종료 시간" />,
+        cell: ({ row }) => <span className="tabular-nums">{row.original.end_time}</span>,
         enableSorting: false,
       },
       {

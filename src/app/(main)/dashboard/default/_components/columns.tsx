@@ -118,11 +118,11 @@ export const dashboardColumns: ColumnDef<z.infer<typeof participantSchema>>[] = 
         }}
       >
         <Label htmlFor={`${row.original.id}-days_after_last_activity`} className="sr-only">
-          Limit
+          Days after last activity
         </Label>
         <Input
           className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-left shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={row.original.days_after_last_activity}
+          defaultValue={row.original.days_after_last_activity ?? "N/A"}
           id={`${row.original.id}-days_after_last_activity`}
         />
       </form>

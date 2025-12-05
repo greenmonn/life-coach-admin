@@ -1,10 +1,15 @@
 import z from "zod";
 
-import { participantSchema } from "./schema";
+import { participantSchema, participantsResponseSchema } from "./schema";
 
-export async function fetchParticipants(group_type='all'): Promise<z.infer<typeof participantSchema>[]> {
+export type GroupType = 'all' | 'chat' | 'nochat';
+
+export async function fetchParticipants(groupType: GroupType = 'all'): Promise<z.infer<typeof participantSchema>[]> {
   try {
-    const response = await fetch("http://34.64.253.26:8080/api/admin/participants", {
+    const url = new URL("http://34.64.253.26:8080/api/admin/participants");
+    url.searchParams.set("type", groupType);
+
+    const response = await fetch(url.toString(), {
       cache: "no-store",
     });
 
@@ -13,10 +18,11 @@ export async function fetchParticipants(group_type='all'): Promise<z.infer<typeo
     }
 
     const data = await response.json();
-    return participantSchema.parse(data).participants;
+    const parsed = participantsResponseSchema.parse(data);
+    return parsed.participants;
 
   } catch (error) {
-    console.error("Failed to fetch themes:", error);
+    console.error("Failed to fetch participants:", error);
     return [];
   }
 }

@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 const lastActivity = "Active";
 
+// TODO: 유저 모델도 보여주기
+
 const readThemes = [
   {
     id: "acceptance",
@@ -45,15 +47,35 @@ export function UserOverview() {
       <CardHeader className="items-center">
         <CardTitle>참여자 정보</CardTitle>
         <CardDescription></CardDescription>
-        <CardAction>
+        {/* <CardAction>
           <Button size="icon" variant="outline">
             <Plus className="size-4" />
           </Button>
-        </CardAction>
+        </CardAction> */}
       </CardHeader>
       <CardContent>
             <div className="space-y-4">
               <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">참여자 ID</span>
+                  <span className="font-medium tabular-nums">Ptestuser_share_IG</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">참여자 그룹</span>
+                  <span className="font-medium tabular-nums">개입 집단 (IG)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">총 완료한 대화 세션 수</span>
+                  <span className="font-medium">5</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">마지막 대화 시각</span>
+                  <span className="font-medium tabular-nums">2025-06-09 03:39:18</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">접근 키</span>
+                  <span className="font-medium tabular-nums"><pre>8abe0224-ea3b-4efd-94c7-a5cd748210ae</pre></span>
+                </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">활성 사용자 여부 (최근 일주일 내 접속 여부)</span>
                   <span className="font-medium tabular-nums">
@@ -66,14 +88,6 @@ export function UserOverview() {
                       {lastActivity}
                     </Badge>
                   </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">마지막 대화 시각</span>
-                  <span className="font-medium tabular-nums">2025-06-09 03:39:18</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">총 완료한 대화 세션 수</span>
-                  <span className="font-medium">5</span>
                 </div>
               </div>
 

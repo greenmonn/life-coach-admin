@@ -1,12 +1,40 @@
-import { ChatSessions, type ChatSession } from "./_components/chat-sessions";
-import data from "./_components/data.json";
+import { ChatSessions } from "./_components/chat-sessions";
+import { ChatSelector } from "./_components/chat-selector";
 
-export default function Page() {
-  const userId = "IG-P1"; // This would come from your data source
+export const dynamic = "force-dynamic";
+
+type PageProps = {
+  searchParams: Promise<{
+    participantId?: string;
+    accessKey?: string;
+    conversationUuid?: string;
+    sessionIndex?: string;
+  }>;
+};
+
+export default async function Page({ searchParams }: PageProps) {
+  const resolved = await searchParams;
+  const participantId = resolved?.participantId;
+  const accessKey = resolved?.accessKey;
+  const conversationUuid = resolved?.conversationUuid;
+  const sessionIndex = resolved?.sessionIndex ? Number(resolved.sessionIndex) : undefined;
+
+  if (!participantId || !accessKey || !conversationUuid) {
+    return (
+      <div className="flex flex-col gap-4 md:gap-6">
+        <ChatSelector />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <ChatSessions userId={userId} sessions={data as ChatSession[]} />
+      <ChatSessions
+        participantId={participantId}
+        accessKey={accessKey}
+        conversationUuid={conversationUuid}
+        sessionIndex={sessionIndex}
+      />
     </div>
   );
 }

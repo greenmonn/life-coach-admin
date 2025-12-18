@@ -4,6 +4,8 @@ import * as React from "react";
 
 import { Download } from "lucide-react";
 import { z } from "zod";
+import { Row } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 
 import { DataTable } from "@/components/data-table/data-table";
 // import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
@@ -18,9 +20,16 @@ import { useConversationColumns } from "./columns.crm";
 import { useMemo } from "react";
 import { conversationSchema } from "./schema";
 
-export function TableCardsClient({ data: conversationData }: { data: z.infer<typeof conversationSchema>[] }) {
+interface TableCardsClientProps {
+  data: z.infer<typeof conversationSchema>[];
+  participantId: string;
+  accessKey: string;
+}
+
+export function TableCardsClient({ data: conversationData, participantId, accessKey }: TableCardsClientProps) {
   const [data, setData] = React.useState(() => conversationData);
   const conversationSchemaColumns = useConversationColumns();
+  const router = useRouter();
   
   const table = useDataTableInstance({
     data: data,
@@ -46,6 +55,17 @@ export function TableCardsClient({ data: conversationData }: { data: z.infer<typ
     return `${pagination.pageIndex}-${pagination.pageSize}-${selectedRows}`;
   }, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize, table.getFilteredSelectedRowModel().rows.length]);
 
+  const handleRowClick = React.useCallback(
+    (row: Row<z.infer<typeof conversationSchema>>) => {
+      const conversationUuid = row.original.conversation_uuid;
+      const sessionIndex = row.original.session_index;
+      if (!conversationUuid) return;
+      const url = `/dashboard/chat?participantId=${encodeURIComponent(participantId)}&accessKey=${encodeURIComponent(accessKey)}&conversationUuid=${encodeURIComponent(conversationUuid)}&sessionIndex=${encodeURIComponent(sessionIndex)}`;
+      router.push(url);
+    },
+    [router, participantId, accessKey]
+  );
+
   return (
     <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs">
       <Card>
@@ -63,7 +83,12 @@ export function TableCardsClient({ data: conversationData }: { data: z.infer<typ
           </CardAction>
         </CardHeader>
         <CardContent className="flex size-full flex-col gap-4">
-          <DataTable table={table} key={paginationKey} columns={conversationSchemaColumns} />
+          <DataTable
+            table={table}
+            key={paginationKey}
+            columns={conversationSchemaColumns}
+            onRowClick={handleRowClick}
+          />
         </CardContent>
       </Card>
     </div>

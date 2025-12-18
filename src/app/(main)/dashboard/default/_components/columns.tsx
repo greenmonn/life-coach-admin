@@ -20,7 +20,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DataTableColumnHeader } from "../../../../../components/data-table/data-table-column-header";
 
 import { participantSchema } from "./schema";
-import { TableCellViewer } from "./table-cell-viewer";
 
 export const dashboardColumns: ColumnDef<z.infer<typeof participantSchema>>[] = [
   {
@@ -50,9 +49,8 @@ export const dashboardColumns: ColumnDef<z.infer<typeof participantSchema>>[] = 
     accessorKey: "id",
     header: ({ column }) => <DataTableColumnHeader column={column} title="참가자 ID" />,
     cell: ({ row }) => {
-      return <TableCellViewer item={row.original} />;
+      return <span className="tabular-nums">{row.original.id}</span>
     },
-    enableSorting: false,
   },
   {
     accessorKey: "access_count",
@@ -60,7 +58,6 @@ export const dashboardColumns: ColumnDef<z.infer<typeof participantSchema>>[] = 
     cell: ({ row }) => {
       return <p>{row.original.access_count}</p>;
     },
-    enableSorting: false,
   },
   {
     accessorKey: "recent_activity",
@@ -79,55 +76,17 @@ export const dashboardColumns: ColumnDef<z.infer<typeof participantSchema>>[] = 
   },
   {
     accessorKey: "session_count",
-    header: ({ column }) => <DataTableColumnHeader className="w-full text-left" column={column} title="대화 수" />,
+    header: ({ column }) => <DataTableColumnHeader className="w-full text-left" column={column} title="세션 수" />,
     cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.id}`,
-            success: "Done",
-            error: "Error",
-          });
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-session_count`} className="sr-only">
-          대화 수
-        </Label>
-        <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-left shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={row.original.session_count}
-          id={`${row.original.id}-session_count`}
-        />
-      </form>
+      <p className="max-w-sm truncate">{row.original.session_count}</p>
     ),
-    enableSorting: false,
   },
   {
     accessorKey: "days_after_last_activity",
     header: ({ column }) => <DataTableColumnHeader className="w-full text-left" column={column} title="마지막 접속 이후 지난 일수" />,
     cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.id}`,
-            success: "Done",
-            error: "Error",
-          });
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-days_after_last_activity`} className="sr-only">
-          Days after last activity
-        </Label>
-        <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-left shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={row.original.days_after_last_activity ?? "N/A"}
-          id={`${row.original.id}-days_after_last_activity`}
-        />
-      </form>
+      <p className="max-w-sm truncate">{row.original.days_after_last_activity ?? "N/A"}</p>
     ),
-    enableSorting: false,
   },
   {
     accessorKey: "access_key",

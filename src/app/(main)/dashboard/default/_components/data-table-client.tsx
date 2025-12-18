@@ -2,14 +2,11 @@
 
 import * as React from "react";
 
-import { Plus } from "lucide-react";
 import { z } from "zod";
+import { Row } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 
 import { DataTable } from "../../../../../components/data-table/data-table";
@@ -31,7 +28,20 @@ interface DataTableClientProps {
 export function DataTableClient({ data: initialData, groupType }: DataTableClientProps) {
   const [data, setData] = React.useState(() => initialData);
   const columns = withDndColumn(dashboardColumns);
-  const table = useDataTableInstance({ data, columns, getRowId: (row) => row.id.toString() });
+  const table = useDataTableInstance({ data, columns, getRowId: (row) => row.id.toString(), defaultPageSize: 50 });
+  const router = useRouter();
+
+  const handleRowClick = React.useCallback(
+    (row: Row<z.infer<typeof participantSchema>>) => {
+      const participantId = row.original.id;
+      const accessKey = row.original.access_key;
+      if (!participantId || !accessKey) return;
+
+      const url = `/dashboard/user?participantId=${encodeURIComponent(participantId)}&accessKey=${encodeURIComponent(accessKey)}`;
+      router.push(url);
+    },
+    [router]
+  );
 
   const handleExport = () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
@@ -60,7 +70,14 @@ export function DataTableClient({ data: initialData, groupType }: DataTableClien
             <span className="hidden lg:inline">Export</span>
           </Button>
         </div>  
-      <DataTable dndEnabled table={table} columns={columns} onReorder={setData} key={paginationKey} />
+      <DataTable
+        dndEnabled
+        table={table}
+        columns={columns}
+        onReorder={setData}
+        onRowClick={handleRowClick}
+        key={paginationKey}
+      />
     </>
       
   );

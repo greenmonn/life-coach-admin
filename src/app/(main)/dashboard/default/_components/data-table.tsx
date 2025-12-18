@@ -33,12 +33,12 @@ export async function DataTable() {
           <TabsTrigger value="participants_control">
             대조 집단 참여자 <Badge variant="secondary">{participantDataCG.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="conversation_list">
+          {/* <TabsTrigger value="conversation_list">
             챗봇 대화 목록
           </TabsTrigger>
           <TabsTrigger value="control_responses">
             대조 집단 응답
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
       </div>
       <TabsContent value="participants_intervention" className="relative flex flex-col gap-4 overflow-auto">

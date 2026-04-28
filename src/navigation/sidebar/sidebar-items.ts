@@ -1,24 +1,4 @@
-import {
-  ShoppingBag,
-  Forklift,
-  Mail,
-  User,
-  MessageSquare,
-  Calendar,
-  Kanban,
-  ReceiptText,
-  Users,
-  Lock,
-  Fingerprint,
-  SquareArrowUpRight,
-  LayoutDashboard,
-  ChartBar,
-  Banknote,
-  BookOpen,
-  Gauge,
-  GraduationCap,
-  type LucideIcon,
-} from "lucide-react";
+import { User, MessageSquare, LayoutDashboard, BookOpen, type LucideIcon } from "lucide-react";
 
 export interface NavSubItem {
   title: string;
@@ -75,17 +55,6 @@ export const sidebarItems: NavGroup[] = [
         title: "주제문 (Theme)",
         url: "/dashboard/theme",
         icon: BookOpen,
-      },
-      {
-        title: "Authentication",
-        url: "/auth",
-        icon: Fingerprint,
-        subItems: [
-          { title: "Login v1", url: "/auth/v1/login", newTab: true },
-          { title: "Login v2", url: "/auth/v2/login", newTab: true },
-          { title: "Register v1", url: "/auth/v1/register", newTab: true },
-          { title: "Register v2", url: "/auth/v2/register", newTab: true },
-        ],
       },
     ],
   },

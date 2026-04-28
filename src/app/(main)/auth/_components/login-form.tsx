@@ -1,39 +1,55 @@
 "use client";
 
+import { useState } from "react";
+
+import { useRouter, useSearchParams } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { ADMIN_DEFAULT_AUTHENTICATED_PATH } from "@/lib/admin-auth";
 
 const FormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  remember: z.boolean().optional(),
 });
 
 export function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [errorMessage, setErrorMessage] = useState("");
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       email: "",
       password: "",
-      remember: false,
     },
   });
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    toast("You submitted the following values", {
-      description: (
-        <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
+    setErrorMessage("");
+
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     });
+
+    if (!response.ok) {
+      setErrorMessage("이메일 또는 비밀번호가 올바르지 않습니다.");
+      return;
+    }
+
+    const nextPath = searchParams.get("next");
+    router.replace(nextPath?.startsWith("/") ? nextPath : ADMIN_DEFAULT_AUTHENTICATED_PATH);
+    router.refresh();
   };
 
   return (
@@ -44,9 +60,9 @@ export function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email Address</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input id="email" type="email" placeholder="you@example.com" autoComplete="email" {...field} />
+                <Input id="email" type="email" autoComplete="email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -71,27 +87,9 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="remember"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center">
-              <FormControl>
-                <Checkbox
-                  id="login-remember"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  className="size-4"
-                />
-              </FormControl>
-              <FormLabel htmlFor="login-remember" className="text-muted-foreground ml-1 text-sm font-medium">
-                Remember me for 30 days
-              </FormLabel>
-            </FormItem>
-          )}
-        />
-        <Button className="w-full" type="submit">
-          Login
+        {errorMessage ? <p className="text-destructive text-sm">{errorMessage}</p> : null}
+        <Button className="w-full" type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Logging in..." : "Login"}
         </Button>
       </form>
     </Form>

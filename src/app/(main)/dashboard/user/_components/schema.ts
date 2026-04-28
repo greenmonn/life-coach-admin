@@ -17,6 +17,11 @@ export const conversationsResponseSchema = z.object({
   conversation_sessions: z.array(conversationSchema),
 });
 
+const personalQuestionSchema = z.object({
+  question: z.string(),
+  timestamp: z.string(),
+});
+
 export const userSchema = z.object({
   id: z.string(),
   access_key: z.string(),
@@ -25,8 +30,8 @@ export const userSchema = z.object({
   last_conversation_time: z.string().nullable(),
   is_active: z.boolean(),
   initial_survey_answers: z.object({
-    'A1': z.string(),
-    'A2': z.string()
+    A1: z.string(),
+    A2: z.string(),
   }),
   clinical_note: z.string(),
   read_themes: z.array(
@@ -35,7 +40,8 @@ export const userSchema = z.object({
       title: z.string(),
       total_pages: z.number(),
       pages_read: z.number(),
-    })
+      personal_questions: z.array(personalQuestionSchema).default([]),
+    }),
   ),
   conversation_uuid: z.string().nullable(),
 });

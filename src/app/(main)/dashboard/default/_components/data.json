@@ -1,10 +1,14 @@
 [
-    {
-      "id": "IG-P1",
-      "access_count": 3,
-      "session_count": 0,
-      "recent_activity": "Today",
-      "days_after_last_activity": 0,
-      "access_key": "8abe0224-ea3b-4efd-94c7-a5cd748210ae"
-    }
+  {
+    "id": "IG-P1",
+    "access_count": 3,
+    "session_count": 0,
+    "is_active": true,
+    "recent_activity": "Today",
+    "days_after_last_activity": 0,
+    "enrolled_date": "2026-04-27",
+    "access_expires_at": "2026-05-27",
+    "access_expired": false,
+    "access_key": "8abe0224-ea3b-4efd-94c7-a5cd748210ae"
+  }
 ]

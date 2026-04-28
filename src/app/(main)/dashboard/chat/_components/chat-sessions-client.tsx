@@ -45,7 +45,7 @@ export function ChatSessionsClient({ data: chatData, initialSessionIndex }: { da
       case "Client":
         return "User";
       case "Coach":
-        return "Coach (SIA)";
+        return "LifeCoach";
       default:
         return "Unknown";
     }

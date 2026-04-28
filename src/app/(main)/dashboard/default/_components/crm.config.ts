@@ -1,16 +1,20 @@
 import z from "zod";
 
+import { buildAdminApiHeaders, buildLifeCoachAdminApiUrl } from "@/lib/lifecoach-api";
+
 import { participantSchema, participantsResponseSchema } from "./schema";
 
-export type GroupType = 'all' | 'chat' | 'nochat';
+export type GroupType = "all" | "chat" | "nochat";
 
-export async function fetchParticipants(groupType: GroupType = 'all'): Promise<z.infer<typeof participantSchema>[]> {
+export async function fetchParticipants(groupType: GroupType = "all"): Promise<z.infer<typeof participantSchema>[]> {
   try {
-    const url = new URL("http://34.64.253.26:8080/api/admin/participants");
+    const url = buildLifeCoachAdminApiUrl("participants");
     url.searchParams.set("type", groupType);
+    url.searchParams.set("include_access_key", "true");
 
     const response = await fetch(url.toString(), {
       cache: "no-store",
+      headers: buildAdminApiHeaders(),
     });
 
     if (!response.ok) {
@@ -20,7 +24,6 @@ export async function fetchParticipants(groupType: GroupType = 'all'): Promise<z
     const data = await response.json();
     const parsed = participantsResponseSchema.parse(data);
     return parsed.participants;
-
   } catch (error) {
     console.error("Failed to fetch participants:", error);
     return [];

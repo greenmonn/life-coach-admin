@@ -5,6 +5,7 @@ export const participantSchema = z
     id: z.string(),
     access_count: z.number(),
     session_count: z.number(),
+    completed_session_count: z.number().nullable().optional(),
     is_active: z.boolean().optional(),
     recent_activity: z.string().nullable(),
     days_after_last_activity: z.number().nullable(),
@@ -21,6 +22,7 @@ export const participantSchema = z
     is_active:
       participant.is_active ??
       (participant.days_after_last_activity !== null && participant.days_after_last_activity <= 7),
+    completed_session_count: participant.completed_session_count ?? null,
     enrolled_date: participant.enrolled_date ?? null,
     access_expires_at: participant.access_expires_at ?? null,
     access_expired: participant.access_expired ?? false,

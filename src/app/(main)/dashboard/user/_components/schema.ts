@@ -26,6 +26,7 @@ export const userSchema = z.object({
   id: z.string(),
   access_key: z.string(),
   group: z.string(),
+  enrolled_date: z.string().nullable().optional(),
   total_completed_sessions: z.number(),
   last_conversation_time: z.string().nullable(),
   is_active: z.boolean(),

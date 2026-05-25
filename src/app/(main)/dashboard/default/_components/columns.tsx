@@ -261,10 +261,10 @@ export const dashboardColumns: ColumnDef<z.infer<typeof participantSchema>>[] = 
     ),
   },
   {
-    accessorKey: "access_count",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="접속 횟수" />,
+    accessorKey: "completed_session_count",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="완료한 세션 수" />,
     cell: ({ row }) => {
-      return <p>{row.original.access_count}</p>;
+      return <p>{row.original.completed_session_count ?? "N/A"}</p>;
     },
   },
   {

@@ -44,6 +44,8 @@ export default async function Page({ searchParams }: PageProps) {
         participantId={participantId}
         accessKey={accessKey}
         enrolledDate={userData.enrolled_date ?? null}
+        participantGroup={userData.group}
+        readThemes={userData.read_themes}
       />
     </div>
   );

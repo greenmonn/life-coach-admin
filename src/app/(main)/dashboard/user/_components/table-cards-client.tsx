@@ -16,13 +16,15 @@ import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { exportToCSV } from "@/lib/export-utils";
 
 import { useConversationColumns } from "./columns.crm";
-import { conversationSchema } from "./schema";
+import { conversationSchema, userSchema } from "./schema";
 
 interface TableCardsClientProps {
   data: z.infer<typeof conversationSchema>[];
   participantId: string;
   accessKey: string;
   enrolledDate: string | null;
+  participantGroup: string;
+  readThemes: z.infer<typeof userSchema>["read_themes"];
 }
 
 function parseSessionDate(value: string | null | undefined): Date | null {
@@ -59,11 +61,11 @@ function formatWeekRange(startDate: Date, endDate: Date): string {
   }).format(endDate)}`;
 }
 
-function getWeeklyCompletion(enrolledDate: string | null | undefined, sessions: z.infer<typeof conversationSchema>[]) {
+function getWeeklyBuckets(enrolledDate: string | null | undefined) {
   const enrollmentStart = parseEnrolledDate(enrolledDate);
   if (!enrollmentStart) return null;
 
-  const weeklySessions = Array.from({ length: 4 }, (_, index) => {
+  return Array.from({ length: 4 }, (_, index) => {
     const weekStart = new Date(enrollmentStart);
     weekStart.setDate(enrollmentStart.getDate() + index * 7);
 
@@ -79,12 +81,29 @@ function getWeeklyCompletion(enrolledDate: string | null | undefined, sessions: 
       targetCount: 3,
     };
   });
+}
 
-  sessions.forEach((session) => {
-    const sessionDate = parseSessionDate(session.end_time);
-    if (!sessionDate) return;
+function getFirstQuestionDatesByTheme(readThemes: z.infer<typeof userSchema>["read_themes"]) {
+  return readThemes
+    .map((theme) => {
+      const timestamps = theme.personal_questions
+        .map((question) => parseSessionDate(question.timestamp))
+        .filter((value): value is Date => value !== null)
+        .sort((a, b) => a.getTime() - b.getTime());
 
-    const weekIndex = weeklySessions.findIndex((week) => sessionDate >= week.weekStart && sessionDate <= week.weekEnd);
+      return timestamps.at(0);
+    })
+    .filter((value): value is Date => value !== undefined);
+}
+
+function getWeeklyCompletionFromDates(enrolledDate: string | null | undefined, activityDates: Date[]) {
+  const weeklySessions = getWeeklyBuckets(enrolledDate);
+  if (!weeklySessions) return null;
+
+  activityDates.forEach((activityDate) => {
+    const weekIndex = weeklySessions.findIndex(
+      (week) => activityDate >= week.weekStart && activityDate <= week.weekEnd,
+    );
     if (weekIndex === -1) return;
 
     const targetWeek = weeklySessions.at(weekIndex);
@@ -96,20 +115,42 @@ function getWeeklyCompletion(enrolledDate: string | null | undefined, sessions: 
   return weeklySessions;
 }
 
+function getWeeklyCompletion(
+  enrolledDate: string | null | undefined,
+  participantGroup: string,
+  sessions: z.infer<typeof conversationSchema>[],
+  readThemes: z.infer<typeof userSchema>["read_themes"],
+) {
+  const isControlGroup = participantGroup.includes("(CG)");
+  const activityDates = isControlGroup
+    ? getFirstQuestionDatesByTheme(readThemes)
+    : sessions.map((session) => parseSessionDate(session.end_time)).filter((value): value is Date => value !== null);
+
+  return getWeeklyCompletionFromDates(enrolledDate, activityDates);
+}
+
 export function TableCardsClient({
   data: conversationData,
   participantId,
   accessKey,
   enrolledDate,
+  participantGroup,
+  readThemes,
 }: TableCardsClientProps) {
   const [data] = React.useState(() => conversationData);
   const conversationSchemaColumns = useConversationColumns();
   const router = useRouter();
-  const weeklyCompletion = useMemo(() => getWeeklyCompletion(enrolledDate, data), [enrolledDate, data]);
+  const weeklyCompletion = useMemo(
+    () => getWeeklyCompletion(enrolledDate, participantGroup, data, readThemes),
+    [enrolledDate, participantGroup, data, readThemes],
+  );
   const completedWeekCount = useMemo(
     () => weeklyCompletion?.filter((week) => week.completedCount >= week.targetCount).length ?? 0,
     [weeklyCompletion],
   );
+  const progressSourceLabel = participantGroup.includes("(CG)")
+    ? "대조 집단 기준: 각 테마의 첫 질문 1건을 활동으로 집계"
+    : "개입 집단 기준: 종료된 대화 세션을 활동으로 집계";
 
   const table = useDataTableInstance({
     data,
@@ -146,37 +187,27 @@ export function TableCardsClient({
     <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs">
       <Card>
         <CardHeader>
-          <CardTitle>대화 세션 목록</CardTitle>
-          <CardDescription>지금까지 참여자가 챗봇과 나눈 대화를 확인할 수 있습니다.</CardDescription>
-          <CardAction>
-            <div className="flex items-center gap-2">
-              {/* <DataTableViewOptions table={table} /> */}
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download />
-                <span className="hidden lg:inline">Export</span>
-              </Button>
-            </div>
-          </CardAction>
+          <CardTitle>4주 참여 진행 현황</CardTitle>
+          <CardDescription>등록일 기준 매주 3회 사용 목표를 집단별 기준으로 계산합니다.</CardDescription>
         </CardHeader>
-        <CardContent className="flex size-full flex-col gap-4">
-          <div className="bg-muted/30 rounded-2xl border px-4 py-4">
-            <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <div className="text-sm font-semibold">4주 참여 진행 현황</div>
-                <div className="text-muted-foreground text-xs">등록일 기준 매주 3회 사용 목표</div>
-              </div>
-              <div className="flex flex-wrap items-center gap-3 text-xs">
-                {enrolledDate ? <div className="text-muted-foreground">시작일: {enrolledDate}</div> : null}
-                <div className="bg-background rounded-full border px-3 py-1 font-medium">
-                  목표 달성 주차 수: {completedWeekCount}주
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="space-y-1">
+                <div className="text-sm font-medium">{progressSourceLabel}</div>
+                <div className="text-muted-foreground text-xs">
+                  {enrolledDate ? `시작일: ${enrolledDate}` : "등록일 정보가 없습니다."}
                 </div>
+              </div>
+              <div className="bg-background rounded-full border px-3 py-1 text-sm font-medium">
+                목표 달성 주차 수: {completedWeekCount}주
               </div>
             </div>
 
             {weeklyCompletion ? (
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 {weeklyCompletion.map((week) => (
-                  <div key={week.weekNumber} className="bg-background rounded-xl border px-3 py-3">
+                  <div key={week.weekNumber} className="bg-muted/30 rounded-xl border px-3 py-3">
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <div className="text-sm font-medium">{week.weekNumber}주차</div>
                       <div className="text-xs font-medium">
@@ -218,7 +249,24 @@ export function TableCardsClient({
               </div>
             )}
           </div>
+        </CardContent>
+      </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>대화 세션 목록</CardTitle>
+          <CardDescription>지금까지 참여자가 챗봇과 나눈 대화를 확인할 수 있습니다.</CardDescription>
+          <CardAction>
+            <div className="flex items-center gap-2">
+              {/* <DataTableViewOptions table={table} /> */}
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                <Download />
+                <span className="hidden lg:inline">Export</span>
+              </Button>
+            </div>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex size-full flex-col gap-4">
           <DataTable
             table={table}
             key={paginationKey}

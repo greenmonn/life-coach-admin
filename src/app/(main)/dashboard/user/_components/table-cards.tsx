@@ -18,6 +18,8 @@ export async function TableCards({ participantId, accessKey }: TableCardsProps) 
       participantId={participantId}
       accessKey={accessKey}
       enrolledDate={userData.enrolled_date ?? null}
+      participantGroup={userData.group}
+      readThemes={userData.read_themes}
     />
   );
 }

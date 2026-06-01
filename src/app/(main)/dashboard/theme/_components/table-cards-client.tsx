@@ -24,7 +24,7 @@ export function TableCardsClient({ data }: TableCardsClientProps) {
     data,
     columns: themeSchemaColumns,
     getRowId: (row) => row.id.toString(),
-    defaultPageSize: 50,
+    defaultPageSize: 100,
   });
 
   const handleExport = () => {

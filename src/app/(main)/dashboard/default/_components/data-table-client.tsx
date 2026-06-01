@@ -28,7 +28,7 @@ interface DataTableClientProps {
 export function DataTableClient({ data: initialData, groupType }: DataTableClientProps) {
   const [data, setData] = React.useState(() => initialData);
   const columns = withDndColumn(dashboardColumns);
-  const table = useDataTableInstance({ data, columns, getRowId: (row) => row.id.toString(), defaultPageSize: 50 });
+  const table = useDataTableInstance({ data, columns, getRowId: (row) => row.id.toString(), defaultPageSize: 100 });
   const router = useRouter();
 
   const handleRowClick = React.useCallback(

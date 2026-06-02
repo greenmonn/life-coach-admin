@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 "use client";
 
 import * as React from "react";
@@ -26,6 +27,23 @@ interface TableCardsClientProps {
   participantGroup: string;
   readThemes: z.infer<typeof userSchema>["read_themes"];
 }
+
+type WeeklyBucket = {
+  weekNumber: number;
+  weekStart: Date;
+  weekEnd: Date;
+  completedCount: number;
+  targetCount: number;
+};
+
+const RETROACTIVE_REFERENCE_DATE = "2026-05-26";
+
+type RetroactiveSummary = {
+  appliedRangeLabel: string;
+  activityCount: number;
+  originalCompletedWeeks: number;
+  retroactiveCompletedWeeks: number;
+};
 
 function parseSessionDate(value: string | null | undefined): Date | null {
   if (!value || value === "N/A") return null;
@@ -61,7 +79,7 @@ function formatWeekRange(startDate: Date, endDate: Date): string {
   }).format(endDate)}`;
 }
 
-function getWeeklyBuckets(enrolledDate: string | null | undefined) {
+function getWeeklyBuckets(enrolledDate: string | null | undefined): WeeklyBucket[] | null {
   const enrollmentStart = parseEnrolledDate(enrolledDate);
   if (!enrollmentStart) return null;
 
@@ -81,6 +99,27 @@ function getWeeklyBuckets(enrolledDate: string | null | undefined) {
       targetCount: 3,
     };
   });
+}
+
+function getStartOfWeek(date: Date): Date {
+  const startOfWeek = new Date(date);
+  const day = startOfWeek.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+
+  startOfWeek.setDate(startOfWeek.getDate() + diffToMonday);
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  return startOfWeek;
+}
+
+function getRetroactiveAwardedWeeks(activityCount: number, maxWeeks: number): number {
+  if (activityCount < 3) return 0;
+
+  return Math.min(Math.floor((activityCount - 3) / 3) + 1, maxWeeks);
+}
+
+function isDateWithinWeek(date: Date, week: WeeklyBucket): boolean {
+  return date >= week.weekStart && date <= week.weekEnd;
 }
 
 function getFirstQuestionDatesByTheme(readThemes: z.infer<typeof userSchema>["read_themes"]) {
@@ -115,18 +154,48 @@ function getWeeklyCompletionFromDates(enrolledDate: string | null | undefined, a
   return weeklySessions;
 }
 
-function getWeeklyCompletion(
-  enrolledDate: string | null | undefined,
+function getActivityDates(
   participantGroup: string,
   sessions: z.infer<typeof conversationSchema>[],
   readThemes: z.infer<typeof userSchema>["read_themes"],
 ) {
   const isControlGroup = participantGroup.includes("(CG)");
-  const activityDates = isControlGroup
+  return isControlGroup
     ? getFirstQuestionDatesByTheme(readThemes)
     : sessions.map((session) => parseSessionDate(session.end_time)).filter((value): value is Date => value !== null);
+}
 
-  return getWeeklyCompletionFromDates(enrolledDate, activityDates);
+// eslint-disable-next-line complexity
+function getRetroactiveSummary(
+  weeklyCompletion: WeeklyBucket[] | null,
+  activityDates: Date[],
+): RetroactiveSummary | null {
+  if (!weeklyCompletion) return null;
+
+  const retroactiveReference = parseEnrolledDate(RETROACTIVE_REFERENCE_DATE);
+  const retroactiveCutoff = retroactiveReference ? getStartOfWeek(retroactiveReference) : null;
+  if (!retroactiveCutoff) return null;
+
+  const retroactiveWeeks = weeklyCompletion.filter((week) => week.weekEnd.getTime() < retroactiveCutoff.getTime());
+  if (retroactiveWeeks.length === 0) return null;
+
+  const activityCount = activityDates.filter((activityDate) =>
+    retroactiveWeeks.some((week) => isDateWithinWeek(activityDate, week)),
+  ).length;
+  const originalCompletedWeeks = retroactiveWeeks.filter((week) => week.completedCount >= week.targetCount).length;
+  const retroactiveCompletedWeeks = getRetroactiveAwardedWeeks(activityCount, retroactiveWeeks.length);
+
+  if (originalCompletedWeeks === retroactiveCompletedWeeks) return null;
+
+  return {
+    appliedRangeLabel:
+      retroactiveWeeks.length === 1
+        ? `${retroactiveWeeks[0]?.weekNumber ?? 1}주차`
+        : `${retroactiveWeeks[0]?.weekNumber ?? 1}-${retroactiveWeeks.at(-1)?.weekNumber ?? retroactiveWeeks.length}주차`,
+    activityCount,
+    originalCompletedWeeks,
+    retroactiveCompletedWeeks,
+  };
 }
 
 export function TableCardsClient({
@@ -140,13 +209,23 @@ export function TableCardsClient({
   const [data] = React.useState(() => conversationData);
   const conversationSchemaColumns = useConversationColumns();
   const router = useRouter();
+  const activityDates = useMemo(
+    () => getActivityDates(participantGroup, data, readThemes),
+    [participantGroup, data, readThemes],
+  );
   const weeklyCompletion = useMemo(
-    () => getWeeklyCompletion(enrolledDate, participantGroup, data, readThemes),
-    [enrolledDate, participantGroup, data, readThemes],
+    () => getWeeklyCompletionFromDates(enrolledDate, activityDates),
+    [enrolledDate, activityDates],
+  );
+  const retroactiveSummary = useMemo(
+    () => getRetroactiveSummary(weeklyCompletion, activityDates),
+    [weeklyCompletion, activityDates],
   );
   const completedWeekCount = useMemo(
-    () => weeklyCompletion?.filter((week) => week.completedCount >= week.targetCount).length ?? 0,
-    [weeklyCompletion],
+    () =>
+      (weeklyCompletion?.filter((week) => week.completedCount >= week.targetCount).length ?? 0) +
+      ((retroactiveSummary?.retroactiveCompletedWeeks ?? 0) - (retroactiveSummary?.originalCompletedWeeks ?? 0)),
+    [weeklyCompletion, retroactiveSummary],
   );
   const progressSourceLabel = participantGroup.includes("(CG)")
     ? "대조 집단 기준: 각 테마의 첫 질문 1건을 활동으로 집계"
@@ -199,8 +278,17 @@ export function TableCardsClient({
                   {enrolledDate ? `시작일: ${enrolledDate}` : "등록일 정보가 없습니다."}
                 </div>
               </div>
-              <div className="bg-background rounded-full border px-3 py-1 text-sm font-medium">
-                목표 달성 주차 수: {completedWeekCount}주
+              <div className="space-y-1 text-right">
+                <div className="bg-background rounded-full border px-3 py-1 text-sm font-medium">
+                  목표 달성 주차 수: {completedWeekCount}주
+                </div>
+                {retroactiveSummary ? (
+                  <div className="text-muted-foreground text-xs">
+                    {retroactiveSummary.appliedRangeLabel}까지 {retroactiveSummary.activityCount}회 참여: 기존{" "}
+                    {retroactiveSummary.originalCompletedWeeks}주에서 {retroactiveSummary.retroactiveCompletedWeeks}주로
+                    소급 적용
+                  </div>
+                ) : null}
               </div>
             </div>
 

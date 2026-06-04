@@ -21,14 +21,14 @@ export default async function Page({ searchParams }: PageProps) {
 
   if (!participantId || !accessKey || !conversationUuid) {
     return (
-      <div className="flex flex-col gap-4 md:gap-6">
+      <div className="flex min-h-full flex-col gap-4 md:gap-6">
         <ChatSelector />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4 md:gap-6">
+    <div className="flex h-full min-h-[calc(100vh-6rem)] flex-col gap-4 md:min-h-[calc(100vh-7rem)] md:gap-6">
       <ChatSessions
         participantId={participantId}
         accessKey={accessKey}

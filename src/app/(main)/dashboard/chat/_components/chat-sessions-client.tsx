@@ -28,7 +28,7 @@ export interface ChatSession {
 }
 
 export function ChatSessionsClient({ data: chatData, initialSessionIndex }: { data: z.infer<typeof chatHistorySchema>[]; initialSessionIndex?: number }) {
-  const [sessions, setSessions] = useState(() => chatData);
+  const [sessions] = useState(() => chatData);
   
   const initialActiveId = (() => {
     if (initialSessionIndex == null) return sessions[0]?.id || "";
@@ -52,21 +52,21 @@ export function ChatSessionsClient({ data: chatData, initialSessionIndex }: { da
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       {/* User ID Header */}
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <h2 className="text-2xl font-semibold">참여자 ID:</h2>
         <span className="text-2xl font-mono text-primary">{userId}</span>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="min-h-0 flex-1">
+        <CardHeader className="shrink-0">
           <CardTitle>대화 기록</CardTitle>
           <CardDescription>참여자의 각 세션별 대화 내용을 확인할 수 있습니다.</CardDescription>
         </CardHeader>
-        <CardContent className="flex size-full flex-col gap-4">
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-4">
           {/* Session Selector */}
-          <div className="flex items-center gap-4">
+          <div className="flex shrink-0 items-center gap-4">
             <label htmlFor="session-select" className="text-sm font-medium whitespace-nowrap">
               세션 선택:
             </label>
@@ -90,7 +90,7 @@ export function ChatSessionsClient({ data: chatData, initialSessionIndex }: { da
 
           {/* Active Session Info */}
           {activeSession && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground border-b pb-3">
+            <div className="flex shrink-0 items-center gap-2 border-b pb-3 text-sm text-muted-foreground">
               <span className="font-medium">Session ID:</span>
               <span className="font-mono">{activeSession.id}</span>
               <span>•</span>
@@ -102,7 +102,7 @@ export function ChatSessionsClient({ data: chatData, initialSessionIndex }: { da
 
           {/* Messages */}
           {activeSession && (
-            <div className="flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-2">
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-2">
               {activeSession.messages.map((message) => {
                 const stageKey = message.stage ? message.stage.toLowerCase() : 'default';
                 const colors = STAGE_COLORS[stageKey] || STAGE_COLORS.default; // 색상 선택 로직

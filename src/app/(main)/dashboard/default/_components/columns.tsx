@@ -13,6 +13,40 @@ import { DataTableColumnHeader } from "../../../../../components/data-table/data
 import { participantSchema } from "./schema";
 
 const REMINDER_TRIGGER_DAYS = 5;
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function parseDateStart(dateText: string | null | undefined) {
+  if (!dateText) return null;
+
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateText);
+  const date = dateOnlyMatch
+    ? new Date(Number(dateOnlyMatch[1]), Number(dateOnlyMatch[2]) - 1, Number(dateOnlyMatch[3]))
+    : new Date(dateText);
+
+  if (Number.isNaN(date.getTime())) return null;
+
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function getDaysSince(dateText: string | null | undefined) {
+  const date = parseDateStart(dateText);
+  if (!date) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return Math.floor((today.getTime() - date.getTime()) / MILLISECONDS_PER_DAY);
+}
+
+function canRequestReminder(participant: z.infer<typeof participantSchema>) {
+  if (participant.days_after_last_activity !== null) {
+    return participant.days_after_last_activity >= REMINDER_TRIGGER_DAYS;
+  }
+
+  const daysAfterEnrollment = getDaysSince(participant.enrolled_date);
+  return daysAfterEnrollment !== null && daysAfterEnrollment >= REMINDER_TRIGGER_DAYS;
+}
 
 function getPromptRequestedToday(data: unknown) {
   if (!data || typeof data !== "object") return false;
@@ -223,11 +257,12 @@ export const dashboardColumns: ColumnDef<z.infer<typeof participantSchema>>[] = 
     header: ({ column }) => <DataTableColumnHeader className="w-full text-left" column={column} title="미접속 일수" />,
     cell: ({ row }) => {
       const inactiveDays = row.original.days_after_last_activity;
+      const showReminderButton = canRequestReminder(row.original);
 
       return (
         <div className="flex items-center gap-2">
           <span className="tabular-nums">{inactiveDays ?? "N/A"}</span>
-          {inactiveDays !== null && inactiveDays >= REMINDER_TRIGGER_DAYS ? (
+          {showReminderButton ? (
             <ReminderTriggerButton participantId={row.original.id} accessKey={row.original.access_key} />
           ) : null}
         </div>
